@@ -1,82 +1,71 @@
 # Builder Coliving Finder
 
-An AI research prompt that finds **builder coliving** programs worldwide: villas,
-houses, and communities where founders, engineers, and remote workers live
-together and build their own projects.
+An interactive, client-side finder for builder residencies, founder houses, and
+remote-work coliving worldwide. Filter by cost per person, program type, region,
+visa reality, stay length, and whether outside work is allowed. View results as
+cards or on a date timeline, and star favourites.
 
-Drop the prompt into any research-capable AI tool with web search and it returns
-a ranked, sourced shortlist filtered to your budget, your visa situation, and
-whether the program lets you keep your own remote work going.
+**Live site:** https://rizabalci.github.io/builder-coliving-finder/
 
-## The problem
+## Features
 
-The "founder house" scene is real and growing, but it is scattered and noisy.
-Some are intense equity residencies that forbid outside work. Some are relaxed
-coliving villas you can join next week. Listings go stale fast, pricing is often
-hidden, and almost nobody tells you whether your passport can actually get you a
-long stay. Searching this by hand is slow and the results are shallow.
+- Search by name, city, or country
+- Filter by program type (structured residency vs open coliving), region, max
+  budget per person, visa difficulty, and "allows outside work"
+- Cost breakdown per person per month, with a total for your chosen stay length
+- Sharing toggle that halves per-room pricing when splitting a room
+- Cards view and a Dates timeline (fixed-date residencies vs rolling coliving)
+- Favourites that persist in your browser
+- Visa ratings scored for a Turkish passport + Slovak/Schengen residence
+- Fully client-side: no API, no keys, no tracking, no external scripts or fonts
 
-This prompt does the structured work: it defines the concept tightly, separates
-the two program types, filters against the constraints that actually matter, and
-forces the model to verify and cite rather than guess.
+## How it works
 
-## What it searches for
+`index.html` is the whole app. All program data lives in a single `PROGRAMS`
+array near the top of the `<script>` block, marked `DATA BLOCK`. The page reads
+that array and renders everything. Region filter chips are generated
+automatically from whatever regions appear in the data.
 
-Residential communities where people live and build together, in two categories
-the prompt labels separately:
+## Updating the data
 
-- **(A) Structured residencies and cohorts** with fixed dates, an application,
-  and sometimes demo days or investment.
-- **(B) Open-enrollment coliving** you can join anytime while keeping your own
-  work and income.
+The data block is the only thing you edit. Each entry looks like:
 
-It covers founder houses, hacker houses, AI builder villas, startup residencies
-with housing, and coliving plus coworking communities for remote workers. It
-deliberately excludes plain hotels, hostels, and pure coworking with no living
-component.
+```js
+{name:"Network School", type:"A", region:"SE Asia", city:"Forest City",
+ country:"Malaysia", monthly:1400, priceBasis:"per_person", outsideWork:true,
+ visa:"easy", visaNote:"...", start:null, weeks:null, wifi:"Fast",
+ tz:"MYT (GMT+8)", apply:"https://ns.com/"}
+```
 
-## Key filters
+Field guide:
 
-Every result is marked against the things that make or break a real move:
+- `type` — `"A"` structured residency/cohort, `"B"` open coliving
+- `region` — free text; becomes a filter chip automatically
+- `priceBasis` — `"per_person"` or `"per_room"` (sharing splits per_room only)
+- `monthly` — EUR, all-in, approximate; confirm on the program's site
+- `outsideWork` — `true` if you can keep your own remote work/income
+- `visa` — `"easy"` / `"medium"` / `"hard"`
+- `visaNote` — short reality check; verify against the official source
+- `start` / `weeks` — `"YYYY-MM-DD"` plus length for type A; `null` for rolling B
+- `wifi` / `tz` / `apply` — note, timezone label, real application URL
 
-- Does it **allow outside work and remote income**? Many residencies do not.
-- **Monthly all-in cost**, with sharing factored in.
-- **Visa reality** for your specific passport, plus the local digital-nomad visa.
-- **Internet quality** and **timezone** versus your clients.
+To refresh: run the research prompt (see the prompt files in this repo), then
+paste verified entries into the `PROGRAMS` array, commit, and push.
 
-## How to use it
+## Notes on the current data
 
-1. Open one of the prompt files in `/prompts`.
-2. Edit the `MY PROFILE` block to match your situation.
-3. Paste it into an AI tool that can browse the web. Web search matters here,
-   because this scene changes month to month and the model's memory will be stale.
-4. Read the comparison table, then dig into the ranked shortlist.
+Entries are real, operating programs gathered by web research, with verified
+visa ratings as of mid-2026. Prices and cohort dates change often, so the
+`apply` link is always the source of truth. Some big hubs (Lisbon, Barcelona,
+Berlin, Tbilisi, Medellín, etc.) appear as "browse" entries that link a real
+directory rather than naming one house, because those markets turn over fast.
 
-## Versions
+## Deploy
 
-| File | Use it when |
-|------|-------------|
-| [`prompts/builder-coliving-finder.md`](prompts/builder-coliving-finder.md) | The full, personalized prompt. Start here. |
-| [`prompts/deep-research-version.md`](prompts/deep-research-version.md) | You're running a long, multi-step deep-research agent. |
-| [`prompts/generic-version.md`](prompts/generic-version.md) | You want a clean, shareable version with no personal details. |
-
-## Example output shape
-
-The prompt asks the model to return:
-
-1. A comparison table of 12 to 20 verified matches (name, type, location, monthly
-   cost, allows outside work, visa ease, apply link).
-2. A ranked top 5 with a short rationale for each.
-3. Full source citations, and an honest "could not verify" list rather than
-   invented entries.
-
-## Why I built it
-
-I build AI and e-commerce tools and work remotely, so I wanted a repeatable way
-to scout places to live and build alongside other people doing the same. Rather
-than re-googling it every few months, I turned the research into a prompt I can
-re-run anytime and hand to anyone.
+GitHub Pages serves `index.html` over `README.md` automatically. Push
+`index.html` to the repo root on the `main` branch and the live site updates
+within a minute or two.
 
 ## License
 
-[MIT](LICENSE) © 2026 Riza Balci
+MIT

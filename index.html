@@ -81,6 +81,7 @@
   .tag{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:5px 9px;border-radius:7px;white-space:nowrap}
   .tag.A{background:rgba(191,77,39,.13);color:#8a3417}
   .tag.B{background:rgba(31,77,68,.12);color:#1f4d44}
+  .tag.P{background:rgba(91,46,120,.13);color:#5b2e78}
   .star{background:none;border:none;cursor:pointer;font-size:21px;line-height:1;color:#c9bca9;padding:0;transition:transform .15s ease,color .15s ease}
   .star:hover{transform:scale(1.18)}
   .star[aria-pressed="true"]{color:var(--clay)}
@@ -121,6 +122,9 @@
   .tl-foot{font-size:11.5px;color:var(--muted);padding:12px 14px 0}
   .tl-star{font-size:14px;color:var(--clay)}
 
+  .section-head{margin:6px 2px 14px}
+  .section-head h2{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-size:24px;font-weight:600;margin:0 0 4px}
+  .section-head p{color:var(--muted);font-size:13.5px;margin:0;max-width:70ch}
   .empty{text-align:center;padding:60px 20px;color:var(--muted)}
   .empty b{font-family:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;font-size:22px;color:var(--ink);font-weight:600;display:block;margin-bottom:6px}
   footer{margin:46px 0 30px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
@@ -154,6 +158,7 @@
             <button class="chip type" data-type="all" aria-pressed="true">All</button>
             <button class="chip type" data-type="A" aria-pressed="false">Structured residency</button>
             <button class="chip type" data-type="B" aria-pressed="false">Open coliving</button>
+            <button class="chip type" data-type="P" aria-pressed="false">Travel program</button>
           </div>
         </div>
       </div>
@@ -223,6 +228,14 @@
     </div>
   </div>
 
+  <div id="programsSection" class="hide">
+    <div class="section-head">
+      <h2>Travel &amp; work programs</h2>
+      <p>Multi-country cohorts and platforms you join to work and travel worldwide, rather than one fixed place. Visa depends on the route you choose.</p>
+    </div>
+    <div id="programs" class="grid"></div>
+  </div>
+  <div id="placesHead" class="section-head hide"><h2>Places to live</h2></div>
   <div id="grid" class="grid"></div>
   <div id="timeline" class="timeline hide"></div>
   <div id="empty" class="empty hide"><b>Nothing matches yet</b>Loosen the budget, region, visa or type filters.</div>
@@ -486,9 +499,48 @@ const PROGRAMS = [
   // Spain & Portugal extras
   {name:"Bilbao (browse)", type:"B", region:"Europe", city:"Bilbao", country:"Spain", monthly:1000, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Basque coast, food scene, greener northern Spain. Spain nomad visa for 90+.", start:null, weeks:null, wifi:"Fast", tz:"CET (GMT+1)", apply:"https://coliving.com/bilbao"},
   {name:"Palma de Mallorca (browse)", type:"B", region:"Europe", city:"Palma", country:"Spain", monthly:1100, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen (Balearics). Island base with a real year-round nomad community. Spain nomad visa option.", start:null, weeks:null, wifi:"Fast fibre", tz:"CET (GMT+1)", apply:"https://coliving.com/palma"},
-  {name:"Lagos (browse)", type:"B", region:"Europe", city:"Lagos", country:"Portugal", monthly:950, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Algarve surf-and-beach town, popular winter base; Portugal nomad visa for 90+.", start:null, weeks:null, wifi:"Reliable", tz:"WET (GMT+0)", apply:"https://coliving.com/lagos"},
+  {name:"Lagos, Portugal (browse)", type:"B", region:"Europe", city:"Lagos", country:"Portugal", monthly:950, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Algarve surf-and-beach town, popular winter base; Portugal nomad visa for 90+.", start:null, weeks:null, wifi:"Reliable", tz:"WET (GMT+0)", apply:"https://coliving.com/lagos"},
   // Ireland (NOT Schengen — visa needed but obtainable)
-  {name:"Dublin (browse)", type:"B", region:"Europe", city:"Dublin", country:"Ireland", monthly:1500, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Ireland is not in Schengen, so a Turkish passport needs an Irish visa (your SK permit does not cover it), but it is obtainable. Big tech-HQ city; pricey housing.", start:null, weeks:null, wifi:"Fast fibre", tz:"GMT (GMT+0)", apply:"https://coliving.com/dublin"}
+  {name:"Dublin (browse)", type:"B", region:"Europe", city:"Dublin", country:"Ireland", monthly:1500, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Ireland is not in Schengen, so a Turkish passport needs an Irish visa (your SK permit does not cover it), but it is obtainable. Big tech-HQ city; pricey housing.", start:null, weeks:null, wifi:"Fast fibre", tz:"GMT (GMT+0)", apply:"https://coliving.com/dublin"},
+  // ===== WORLDWIDE GAP FILL (visa-easy for Turkish passports, verified Jun 2026) =====
+  // Middle East
+  {name:"Muscat (browse)", type:"B", region:"Middle East", city:"Muscat", country:"Oman", monthly:1100, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Oman is visa-free for Turkish passports. Calm, safe Gulf base; coast and mountains.", start:null, weeks:null, wifi:"Fast", tz:"GST (GMT+4)", apply:"https://coliving.com/muscat"},
+  {name:"Doha (browse)", type:"B", region:"Middle East", city:"Doha", country:"Qatar", monthly:1500, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Qatar is visa-free for Turkish passports. Modern, fast, well-connected; pricey.", start:null, weeks:null, wifi:"Fast fibre", tz:"AST (GMT+3)", apply:"https://coliving.com/doha"},
+  // Oceania — Fiji is the visa-easy one
+  {name:"Nadi / Suva (browse)", type:"B", region:"Oceania", city:"Nadi", country:"Fiji", monthly:1000, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Fiji is visa-free for Turkish passports (up to 4 months). Pacific island base, slower pace, decent connectivity.", start:null, weeks:null, wifi:"Variable", tz:"FJT (GMT+12)", apply:"https://coliving.com/fiji"},
+  // South Asia — Maldives (visa on arrival)
+  {name:"Male / Maafushi (browse)", type:"B", region:"South Asia", city:"Male", country:"Maldives", monthly:1200, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Maldives gives a free visa on arrival to all (30 days). Local islands like Maafushi are the affordable, livable option.", start:null, weeks:null, wifi:"Reliable", tz:"MVT (GMT+5)", apply:"https://coliving.com/maldives"},
+  // East Asia — Macau
+  {name:"Macau (browse)", type:"B", region:"East Asia", city:"Macau", country:"Macau", monthly:1400, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Macau is visa-free for Turkish passports. Compact, walkable, neighbouring Hong Kong; expensive.", start:null, weeks:null, wifi:"Fast fibre", tz:"HKT (GMT+8)", apply:"https://coliving.com/macau"},
+  // Africa — verified visa-free spots
+  {name:"Gaborone (browse)", type:"B", region:"Africa", city:"Gaborone", country:"Botswana", monthly:700, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Botswana is visa-free for Turkish passports. Safari gateway; thin formal coliving, mostly serviced rentals.", start:null, weeks:null, wifi:"Variable", tz:"CAT (GMT+2)", apply:"https://coliving.com/gaborone"},
+  {name:"Lusaka (browse)", type:"B", region:"Africa", city:"Lusaka", country:"Zambia", monthly:650, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Zambia is visa-free for Turkish passports. Emerging scene; mostly serviced apartments rather than formal coliving.", start:null, weeks:null, wifi:"Variable", tz:"CAT (GMT+2)", apply:"https://coliving.com/lusaka"},
+  {name:"Mahe (browse)", type:"B", region:"Africa", city:"Mahe", country:"Seychelles", monthly:1300, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Seychelles is visa-free for Turkish passports (visitor permit on arrival). Indian Ocean islands; premium pricing.", start:null, weeks:null, wifi:"Reliable", tz:"SCT (GMT+4)", apply:"https://coliving.com/seychelles"},
+  {name:"Addis Ababa (browse)", type:"B", region:"Africa", city:"Addis Ababa", country:"Ethiopia", monthly:600, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Ethiopia issues an e-visa / visa on arrival (Addis Ababa airport). African Union hub, growing tech scene.", start:null, weeks:null, wifi:"Variable", tz:"EAT (GMT+3)", apply:"https://coliving.com/addis-ababa"},
+  {name:"Lagos, Nigeria (browse)", type:"B", region:"Africa", city:"Lagos", country:"Nigeria", monthly:800, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Nigeria requires a visa for Turkish passports; apply ahead. Huge, chaotic, energetic startup scene.", start:null, weeks:null, wifi:"Variable", tz:"WAT (GMT+1)", apply:"https://coliving.com/lagos"},
+  // SE Asia — notable misses
+  {name:"Hanoi (browse)", type:"B", region:"SE Asia", city:"Hanoi", country:"Vietnam", monthly:650, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Vietnam e-visa for Turkish passports (up to 90 days). Cultural capital, cheaper than HCMC, four seasons.", start:null, weeks:null, wifi:"Fast", tz:"ICT (GMT+7)", apply:"https://coliving.com/hanoi"},
+  {name:"Canggu / Yogyakarta (browse)", type:"B", region:"SE Asia", city:"Yogyakarta", country:"Indonesia", monthly:600, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Indonesia entry is 30 days; longer needs a B211A. Cultural heart of Java, far cheaper than Bali.", start:null, weeks:null, wifi:"Reliable", tz:"WIB (GMT+7)", apply:"https://coliving.com/yogyakarta"},
+  {name:"Siem Reap (browse)", type:"B", region:"SE Asia", city:"Siem Reap", country:"Cambodia", monthly:550, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Cambodia gives a visa on arrival to Turkish passports. Temples, very low cost, small nomad crowd.", start:null, weeks:null, wifi:"Reliable", tz:"ICT (GMT+7)", apply:"https://coliving.com/siem-reap"},
+  // ===== FINAL FOUR (verified visa-easy secondary cities) =====
+  {name:"Antalya (browse)", type:"B", region:"Middle East", city:"Antalya", country:"Turkey", monthly:700, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Home country for you, no visa. Mediterranean coast, mild winters, fast-growing nomad and coliving scene.", start:null, weeks:null, wifi:"Fast", tz:"TRT (GMT+3)", apply:"https://coliving.com/antalya"},
+  {name:"Cusco (browse)", type:"B", region:"Latin America", city:"Cusco", country:"Peru", monthly:600, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Peru is visa-free for Turkish passports (up to 183 days). Andean base near Machu Picchu, low cost, real nomad crowd.", start:null, weeks:null, wifi:"Reliable", tz:"PET (GMT-5)", apply:"https://coliving.com/cusco"},
+  {name:"Santa Marta (browse)", type:"B", region:"Latin America", city:"Santa Marta", country:"Colombia", monthly:650, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Colombia is visa-free for Turkish passports (90 days, extendable). Caribbean coast, gateway to Tayrona; quieter than Medellin.", start:null, weeks:null, wifi:"Reliable", tz:"COT (GMT-5)", apply:"https://coliving.com/santa-marta"},
+  {name:"Kyoto (browse)", type:"B", region:"East Asia", city:"Kyoto", country:"Japan", monthly:1150, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Japan is visa-free for Turkish passports up to 90 days. Traditional, calmer than Tokyo, walkable.", start:null, weeks:null, wifi:"Fast fibre", tz:"JST (GMT+9)", apply:"https://coliving.com/kyoto"},
+  // ===== TURKEY DOMESTIC (home country, no visa) =====
+  {name:"Izmir (browse)", type:"B", region:"Middle East", city:"Izmir", country:"Turkey", monthly:650, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Home country for you, no visa. Aegean coast city, relaxed, growing remote-work crowd; gateway to Cesme and Alacati.", start:null, weeks:null, wifi:"Fast", tz:"TRT (GMT+3)", apply:"https://coliving.com/izmir"},
+  {name:"Fethiye (browse)", type:"B", region:"Middle East", city:"Fethiye", country:"Turkey", monthly:600, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Home country, no visa. Turquoise-coast town, sailing and paragliding, popular long-stay nomad base.", start:null, weeks:null, wifi:"Reliable", tz:"TRT (GMT+3)", apply:"https://coliving.com/fethiye"},
+  {name:"Bodrum (browse)", type:"B", region:"Middle East", city:"Bodrum", country:"Turkey", monthly:750, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Home country, no visa. Aegean resort town, big in summer, marina and sailing scene.", start:null, weeks:null, wifi:"Reliable", tz:"TRT (GMT+3)", apply:"https://coliving.com/bodrum"},
+  // ===== TRAVEL & WORK PROGRAMS (multi-country traveling cohorts; region "Global"). Verified operating Jun 2026. Visa varies by chosen route — most legs are visa-easy for you, but check each itinerary. =====
+  {name:"WiFi Tribe", type:"P", region:"Global", city:"Multiple chapters", country:"Worldwide", monthly:1500, priceBasis:"per_person", outsideWork:true, visa:"medium", visaNote:"Multi-country: month-long chapters running simultaneously worldwide. Visa depends on which chapters you pick; most are visa-easy for you, but check each. Interview to join.", start:null, weeks:4, wifi:"Fast", tz:"Varies", apply:"https://wifitribe.co/"},
+  {name:"Noma Collective (Hacker Paradise)", type:"P", region:"Global", city:"Rotating destinations", country:"Worldwide", monthly:1600, priceBasis:"per_person", outsideWork:true, visa:"medium", visaNote:"Hacker Paradise merged into Noma in 2024. 2-4 week pop-ups in places like Portugal, Spain, Argentina, Morocco, Guatemala, Panama, Kenya. Visa varies by destination; most easy for you.", start:null, weeks:4, wifi:"Fast", tz:"Varies", apply:"https://www.nomacollective.com/"},
+  {name:"Unsettled", type:"P", region:"Global", city:"Rotating retreats", country:"Worldwide", monthly:2000, priceBasis:"per_person", outsideWork:true, visa:"medium", visaNote:"Retreats since 2014, 1 week to 1 month, destinations worldwide (e.g. Bali, Cape Town, Bora Bora). Visa varies by retreat; check each. Wide age range.", start:null, weeks:4, wifi:"Fast", tz:"Varies", apply:"https://beunsettled.co/"},
+  {name:"Work Wanderers", type:"P", region:"Global", city:"Small-group trips", country:"Worldwide", monthly:1800, priceBasis:"per_person", outsideWork:true, visa:"medium", visaNote:"Small cohorts of 8-18 with a coordinator and coaching; luxe stays, shared meals, local immersion. Visa varies by destination.", start:null, weeks:4, wifi:"Fast", tz:"Varies", apply:"https://www.workwanderers.com/"},
+  {name:"Venture With Impact", type:"P", region:"Global", city:"Impact retreats", country:"Worldwide", monthly:1700, priceBasis:"per_person", outsideWork:true, visa:"medium", visaNote:"1-week and month-long retreats combining remote work with social-impact projects. Visa varies by destination.", start:null, weeks:4, wifi:"Reliable", tz:"Varies", apply:"https://www.venturewithimpact.org/"},
+  {name:"Behere", type:"P", region:"Global", city:"Pick your city", country:"Worldwide", monthly:1650, priceBasis:"per_person", outsideWork:true, visa:"medium", visaNote:"Platform (not a fixed cohort): links you to vetted apartments, coworking and gyms in cities worldwide (Barcelona, Bali, Prague, etc.). Choose your own city, so visa is whatever that country needs for you.", start:null, weeks:4, wifi:"Fast", tz:"Varies", apply:"https://www.behere.com/"},
+  {name:"Boundless Life (families)", type:"P", region:"Global", city:"Family hubs", country:"Worldwide", monthly:2200, priceBasis:"per_person", outsideWork:true, visa:"medium", visaNote:"Built for digital-nomad families: coworking + a kids education centre in each hub (Portugal, Greece, Italy, Indonesia, Montenegro). 4-week and 3-month terms; 2026/27 dates published. Visa varies by hub, most easy for you.", start:null, weeks:4, wifi:"Fast fibre", tz:"Varies", apply:"https://www.boundless.life/"},
+  {name:"Nomad Cruise", type:"P", region:"Global", city:"At sea + port cities", country:"Worldwide", monthly:1500, priceBasis:"per_person", outsideWork:true, visa:"medium", visaNote:"Multi-day sailings connecting 300+ nomads between continents, with talks and workshops. Visa depends on the embarkation/disembarkation countries, check the specific route.", start:null, weeks:2, wifi:"Variable", tz:"Varies", apply:"https://www.nomadcruise.com/"},
+  {name:"NomadWeek (Pangea)", type:"P", region:"Global", city:"Cape Town + events", country:"Worldwide", monthly:1200, priceBasis:"per_person", outsideWork:true, visa:"medium", visaNote:"Week-long nomad festivals (e.g. Cape Town, 25-31 Jan 2026) plus a year-round community. Visa depends on the host city; South Africa is visa-free 30 days for you.", start:null, weeks:1, wifi:"Fast", tz:"Varies", apply:"https://www.thepangea.app/"}
 ];
 
 /* ---------- favourites (persist on the deployed site; safe no-op in sandbox) ---------- */
@@ -540,8 +592,8 @@ function dateLabel(p){
   const d=new Date(p.start);
   return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})+(p.weeks?` \u00b7 ${p.weeks} wks`:"");
 }
-function renderGrid(list){
-  const grid=document.getElementById("grid");
+function renderGrid(list, target){
+  const grid=target||document.getElementById("grid");
   grid.innerHTML=list.map((p,i)=>{
     const pp=perPerson(p), shared=state.share&&p.priceBasis==="per_room", total=pp*state.months, fav=favs.has(p.name);
     return `<article class="card" style="animation-delay:${Math.min(i*30,420)}ms">
@@ -549,7 +601,7 @@ function renderGrid(list){
         <div><div class="cname">${p.name}</div><div class="loc">${p.city}, ${p.country} \u00b7 ${p.region}</div></div>
         <div class="head-right">
           <button class="star" data-fav="${esc(p.name)}" aria-pressed="${fav}" title="Save to favourites">${fav?"\u2605":"\u2606"}</button>
-          <span class="tag ${p.type}">${p.type==="A"?"Residency":"Coliving"}</span>
+          <span class="tag ${p.type}">${p.type==="A"?"Residency":(p.type==="P"?"Travel program":"Coliving")}</span>
         </div>
       </div>
       <div class="cost">
@@ -602,18 +654,40 @@ function renderTimeline(list){
 /* ---------- main render ---------- */
 function render(){
   const list=filtered();
-  document.getElementById("count").innerHTML=`${list.length} place${list.length===1?"":"s"} <span>of ${PROGRAMS.length}</span>`;
+  const programs=list.filter(p=>p.type==="P");
+  const places=list.filter(p=>p.type!=="P");
+  document.getElementById("count").innerHTML=`${list.length} result${list.length===1?"":"s"} <span>of ${PROGRAMS.length}</span>`;
   const empty=document.getElementById("empty"),grid=document.getElementById("grid"),tl=document.getElementById("timeline");
+  const progSec=document.getElementById("programsSection"),progGrid=document.getElementById("programs"),placesHead=document.getElementById("placesHead");
+
+  // Programs section: only in card view, and only when some match
+  const showPrograms = state.view==="grid" && programs.length>0;
+  progSec.classList.toggle("hide", !showPrograms);
+  if(showPrograms) renderGrid(programs, progGrid);
+
+  // Places section
+  const showPlaces = places.length>0;
+  // Show the "Places to live" header only when programs are also showing (to separate the two)
+  placesHead.classList.toggle("hide", !(showPrograms && showPlaces));
+
   if(list.length===0){ empty.classList.remove("hide"); grid.classList.add("hide"); tl.classList.add("hide"); return; }
   empty.classList.add("hide");
-  if(state.view==="grid"){ grid.classList.remove("hide"); tl.classList.add("hide"); renderGrid(list); }
-  else{ tl.classList.remove("hide"); grid.classList.add("hide"); renderTimeline(list); }
+
+  if(state.view==="grid"){
+    grid.classList.toggle("hide", !showPlaces);
+    tl.classList.add("hide");
+    if(showPlaces) renderGrid(places, grid);
+  } else {
+    // timeline view applies to places only (programs are rolling/route-based)
+    tl.classList.remove("hide"); grid.classList.add("hide");
+    renderTimeline(places.length?places:list);
+  }
 }
 function updateFavCount(){ document.getElementById("favCount").textContent="("+favs.size+")"; }
 
 /* ---------- build region chips from data ---------- */
 (function(){
-  const order=["Europe","Caucasus","Central Asia","Middle East","Africa","South Asia","SE Asia","East Asia","Oceania","North America","Latin America"];
+  const order=["Global","Europe","Caucasus","Central Asia","Middle East","Africa","South Asia","SE Asia","East Asia","Oceania","North America","Latin America"];
   const present=[...new Set(PROGRAMS.map(p=>p.region))];
   const regions=present.sort((a,b)=>{ const ia=order.indexOf(a),ib=order.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib); });
   document.getElementById("regionChips").innerHTML=
