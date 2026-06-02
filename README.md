@@ -54,11 +54,22 @@ paste verified entries into the `PROGRAMS` array, commit, and push.
 
 ## Notes on the current data
 
-Entries are real, operating programs gathered by web research, with verified
-visa ratings as of mid-2026. Prices and cohort dates change often, so the
-`apply` link is always the source of truth. Some big hubs (Lisbon, Barcelona,
-Berlin, Tbilisi, Medellín, etc.) appear as "browse" entries that link a real
-directory rather than naming one house, because those markets turn over fast.
+The data comes in two clearly separated tiers, gathered by web research with
+verified visa ratings as of mid-2026.
+
+1. **Direct-link tier (41 entries):** named operators, residencies and travel
+   programs whose `apply` link points straight at that operator's own site,
+   e.g. Anceu Coliving, Cloud Citadel, Outsite, Sun and Co., Network School.
+   These are the "Travel & work programs" and "Places to live" sections.
+2. **Browse-by-city tier (170 entries):** whole-city scenes (Lisbon, Tokyo,
+   Medellín, etc.) shown in their own "Browse by city" section. Each links a
+   real coliving directory for that city rather than naming one house, because
+   a city has dozens of operators that turn over fast. These are labelled
+   "City · browse" and kept apart from the direct-link tier so it is always
+   obvious which is which. Filter to just these with the "Browse by city" chip.
+
+Prices and cohort dates change often, so the `apply` link is always the source
+of truth.
 
 ## Deploy
 
