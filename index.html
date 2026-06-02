@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Builder Coliving Finder</title><style>
+  :root{
+    --bg:#f3ede2; --paper:#fbf7ef; --ink:#211c17; --muted:#6f6357;
+    --line:rgba(33,28,23,.12); --line-strong:rgba(33,28,23,.22);
+    --clay:#bf4d27; --clay-soft:#e8c7b4; --pine:#1f4d44;
+    --yes:#2f6b3f; --no:#9e3326;
+    --shadow:0 1px 0 rgba(33,28,23,.04), 0 18px 40px -28px rgba(33,28,23,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+    background-image:
+      radial-gradient(1200px 600px at 88% -8%, rgba(191,77,39,.10), transparent 60%),
+      radial-gradient(900px 500px at -5% 10%, rgba(31,77,68,.08), transparent 55%);
+  }
+  a{color:inherit}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+
+  header{padding:34px 0 14px}
+  .kicker{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--clay);font-weight:600}
+  h1{font-family:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;font-weight:900;font-size:clamp(34px,6vw,62px);line-height:.95;margin:6px 0 8px;letter-spacing:-.01em}
+  h1 em{font-style:italic;font-weight:500;color:var(--clay)}
+  .lede{max-width:60ch;color:var(--muted);font-size:16px}
+  .badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .sample,.profile{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:600}
+  .sample{background:var(--clay-soft);border:1px solid rgba(191,77,39,.4);color:#7a3216}
+  .profile{background:rgba(31,77,68,.1);border:1px solid rgba(31,77,68,.35);color:#1f4d44}
+
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px 18px 14px;margin:22px 0 18px;box-shadow:var(--shadow)}
+  .ctrl-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:18px 26px}
+  @media(max-width:820px){.ctrl-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.ctrl-grid{grid-template-columns:1fr}}
+  .field{margin-bottom:14px}
+  .label{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:8px;display:block}
+  .search{width:100%;border:1px solid var(--line-strong);background:#fff;border-radius:11px;padding:11px 13px;font:inherit;color:var(--ink)}
+  .search:focus{outline:2px solid var(--clay);outline-offset:1px;border-color:var(--clay)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{border:1px solid var(--line-strong);background:#fff;border-radius:999px;padding:7px 13px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink);transition:all .15s ease}
+  .chip:hover{border-color:var(--ink)}
+  .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .chip.type[aria-pressed="true"]{background:var(--clay);border-color:var(--clay)}
+  .slider-row{display:flex;align-items:center;gap:12px}
+  input[type=range]{flex:1;accent-color:var(--clay);height:4px}
+  .val{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-weight:600;font-size:14px;min-width:74px;text-align:right}
+  .toggle{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+  .switch{width:42px;height:24px;border-radius:999px;background:#d8cdbd;position:relative;transition:background .18s ease;border:1px solid var(--line-strong);flex:none}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .18s ease}
+  .toggle input{position:absolute;opacity:0;pointer-events:none}
+  .toggle input:checked + .switch{background:var(--yes)}
+  .toggle input:checked + .switch::after{transform:translateX(18px)}
+  .toggle .t-label{font-size:13.5px}
+  .toggle .t-sub{color:var(--muted);font-size:12px}
+  .region-row{border-top:1px solid var(--line);margin-top:4px;padding-top:14px}
+  select.search{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%236f6357' stroke-width='1.6'/></svg>");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+
+  .resbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:4px 2px 14px}
+  .count{font-family:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;font-size:20px;font-weight:600}
+  .count span{color:var(--muted);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:500}
+  .res-right{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .views{display:flex;gap:6px}
+  .reset{background:none;border:none;color:var(--clay);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .favtoggle{border:1px solid var(--line-strong);background:#fff;border-radius:999px;padding:7px 13px;font:inherit;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;color:var(--ink)}
+  .favtoggle[aria-pressed="true"]{background:var(--clay);color:#fff;border-color:var(--clay)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:13px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);animation:rise .5s ease forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .card:hover{border-color:var(--line-strong);transform:translateY(-3px);transition:transform .18s ease,border-color .18s ease}
+  .card .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .cname{font-family:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;font-size:21px;font-weight:600;line-height:1.05}
+  .loc{color:var(--muted);font-size:13px;margin-top:3px}
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none}
+  .tag{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:5px 9px;border-radius:7px;white-space:nowrap}
+  .tag.A{background:rgba(191,77,39,.13);color:#8a3417}
+  .tag.B{background:rgba(31,77,68,.12);color:#1f4d44}
+  .star{background:none;border:none;cursor:pointer;font-size:21px;line-height:1;color:#c9bca9;padding:0;transition:transform .15s ease,color .15s ease}
+  .star:hover{transform:scale(1.18)}
+  .star[aria-pressed="true"]{color:var(--clay)}
+
+  .cost{display:flex;align-items:flex-end;gap:10px;padding:11px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .cost .big{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:27px;font-weight:600;line-height:1}
+  .cost .per{color:var(--muted);font-size:12px;padding-bottom:3px}
+  .cost .total{margin-left:auto;text-align:right}
+  .cost .total b{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:15px;font-weight:600;display:block}
+  .cost .total span{color:var(--muted);font-size:11px}
+  .basis{font-size:11.5px;color:var(--muted);margin-top:-4px}
+  .meta{display:flex;flex-wrap:wrap;gap:7px}
+  .pill{font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;border:1px solid var(--line-strong);display:inline-flex;gap:6px;align-items:center}
+  .pill.yes{color:var(--yes);border-color:rgba(47,107,63,.4);background:rgba(47,107,63,.08)}
+  .pill.no{color:var(--no);border-color:rgba(158,51,38,.4);background:rgba(158,51,38,.07)}
+  .pill.neutral{color:var(--muted)}
+  .dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+  .visanote{font-size:12.5px;color:var(--muted);background:rgba(31,77,68,.06);border-left:3px solid var(--pine);padding:8px 10px;border-radius:0 8px 8px 0;line-height:1.4}
+  .visanote b{color:var(--ink);font-weight:600}
+  .extra{display:flex;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:12.5px}
+  .extra b{color:var(--ink);font-weight:600}
+  .apply{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--ink);color:var(--paper);text-decoration:none;border-radius:11px;padding:11px;font-weight:600;font-size:14px;transition:background .15s}
+  .apply:hover{background:var(--clay)}
+
+  .timeline{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:8px 4px 18px;box-shadow:var(--shadow);overflow-x:auto}
+  .tl-months{display:grid;grid-template-columns:210px 1fr;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper);z-index:2;min-width:640px}
+  .tl-months .scale{display:grid}
+  .tl-months .m{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:9.5px;color:var(--muted);text-align:center;padding:9px 0;border-left:1px solid var(--line)}
+  .tl-row{display:grid;grid-template-columns:210px 1fr;align-items:center;border-bottom:1px solid var(--line);min-height:54px;min-width:640px}
+  .tl-row:hover{background:rgba(33,28,23,.025)}
+  .tl-name{padding:8px 14px;display:flex;align-items:center;gap:8px}
+  .tl-name .n{font-family:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;font-size:15px;font-weight:600;line-height:1.05}
+  .tl-name .s{color:var(--muted);font-size:11.5px}
+  .tl-track{position:relative;height:54px;margin-right:14px}
+  .bar{position:absolute;top:50%;transform:translateY(-50%);height:24px;border-radius:7px;display:flex;align-items:center;padding:0 9px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-size:10.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden}
+  .bar.A{background:var(--clay)}
+  .bar.rolling{background:repeating-linear-gradient(45deg,var(--pine),var(--pine) 7px,#2c615655 7px,#2c615655 14px);left:0;right:0;color:#fff}
+  .tl-foot{font-size:11.5px;color:var(--muted);padding:12px 14px 0}
+  .tl-star{font-size:14px;color:var(--clay)}
+
+  .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+  .empty b{font-family:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;font-size:22px;color:var(--ink);font-weight:600;display:block;margin-bottom:6px}
+  footer{margin:46px 0 30px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer a{color:var(--clay)}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="kicker">Live &amp; build, somewhere new</span>
+    <h1>Builder <em>Coliving</em> Finder</h1>
+    <p class="lede">Founder houses, hacker villas and remote-work coliving worldwide, filtered by what actually decides a move: cost per person, whether you can keep your own work, visa reality and dates.</p>
+    <div class="badges">
+      <span class="sample">✔ <span><b>Real operating programs,</b> verified Jun 2026. Costs are approximate, confirm on each site.</span></span>
+      <span class="profile">🛂 <span>Visa verified Jun 2026 for a <b>Turkish passport + Slovak residence</b></span></span>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="ctrl-grid">
+      <div>
+        <div class="field">
+          <label class="label" for="q">Search</label>
+          <input id="q" class="search" type="text" placeholder="Name, city or country…" autocomplete="off">
+        </div>
+        <div class="field">
+          <span class="label">Program type</span>
+          <div class="chips" id="typeChips">
+            <button class="chip type" data-type="all" aria-pressed="true">All</button>
+            <button class="chip type" data-type="A" aria-pressed="false">Structured residency</button>
+            <button class="chip type" data-type="B" aria-pressed="false">Open coliving</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="field">
+          <label class="label" for="budget">Max budget / person / month</label>
+          <div class="slider-row">
+            <input id="budget" type="range" min="400" max="2800" step="50" value="2800">
+            <span class="val" id="budgetVal">Any</span>
+          </div>
+        </div>
+        <div class="field">
+          <span class="label">Visa for your profile</span>
+          <div class="chips" id="visaChips">
+            <button class="chip" data-visa="all" aria-pressed="true">Any</button>
+            <button class="chip" data-visa="easy" aria-pressed="false">Easy</button>
+            <button class="chip" data-visa="medium" aria-pressed="false">Up to medium</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="field">
+          <label class="label" for="months">Stay length</label>
+          <div class="slider-row">
+            <input id="months" type="range" min="1" max="12" step="1" value="3">
+            <span class="val" id="monthsVal">3 mo</span>
+          </div>
+        </div>
+        <div class="field">
+          <span class="label">Sharing</span>
+          <label class="toggle">
+            <input type="checkbox" id="share">
+            <span class="switch"></span>
+            <span><span class="t-label">Split a room with a partner</span><br><span class="t-sub">halves per-room pricing only</span></span>
+          </label>
+        </div>
+        <div class="field">
+          <label class="toggle" style="margin-bottom:6px">
+            <input type="checkbox" id="workOnly">
+            <span class="switch"></span>
+            <span class="t-label">Only places that allow outside work</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="region-row">
+      <span class="label">Region</span>
+      <div class="chips" id="regionChips"></div>
+    </div>
+  </section>
+
+  <div class="resbar">
+    <div class="count"><span id="count">0 places</span></div>
+    <div class="res-right">
+      <button class="favtoggle" id="favToggle" aria-pressed="false">★ Favourites <span id="favCount">(0)</span></button>
+      <button class="reset" id="reset">Reset</button>
+      <label class="label" for="sort" style="margin:0">Sort</label>
+      <select id="sort" class="search" style="width:auto;padding:9px 34px 9px 12px">
+        <option value="cost">Cost, low to high</option>
+        <option value="date">Start date, soonest</option>
+        <option value="name">Name, A–Z</option>
+      </select>
+      <div class="views chips">
+        <button class="chip view" data-view="grid" aria-pressed="true">Cards</button>
+        <button class="chip view" data-view="dates" aria-pressed="false">Dates</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="grid" class="grid"></div>
+  <div id="timeline" class="timeline hide"></div>
+  <div id="empty" class="empty hide"><b>Nothing matches yet</b>Loosen the budget, region, visa or type filters.</div>
+
+  <footer>
+    <span>Built client-side. No tracking, no API. Favourites save in your browser. Edit the data block to update.</span>
+    <span><a href="https://github.com/rizabalci/builder-coliving-finder">github.com/rizabalci/builder-coliving-finder</a></span>
+  </footer>
+</div>
+
+<script>
+/* =========================================================================
+   DATA BLOCK — the only thing you edit to refresh the finder.
+   Field guide:
+     type        : "A" structured residency/cohort | "B" open coliving
+     region      : free text, becomes a filter chip automatically
+     priceBasis  : "per_person" | "per_room" (sharing splits per_room only)
+     monthly     : EUR, all-in, APPROXIMATE — confirm on the program's site
+     outsideWork : true if you can keep your own remote work/income
+     visa        : "easy" | "medium" | "hard" (Turkish passport + Slovak/Schengen residence)
+     start/weeks : "YYYY-MM-DD" + length for A | null for rolling B
+     wifi / tz / apply : note, timezone label, real application URL
+
+   THESE ARE REAL, OPERATING PROGRAMS as of Jun 2026, gathered by web research.
+   Prices and cohort dates change often — the "apply" link is the source of truth,
+   always confirm there. Visa ratings use the verified Turkish-passport rules.
+   Note: most structured US founder residencies are visa-HARD (full US visa, no
+   Schengen help) AND fund you rather than house you, so their monthly figure is
+   an estimate of local room cost, flagged in the visa note.
+   ========================================================================= */
+const PROGRAMS = [
+  // ===== EUROPE — Schengen, your Slovak residence permit covers short stays =====
+  {name:"Coliving Bansko", type:"B", region:"Europe", city:"Bansko", country:"Bulgaria", monthly:480, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Bulgaria is in Schengen, so your residence permit covers short stays. Cheapest base here; big nomad/builder scene.", start:null, weeks:null, wifi:"Fast", tz:"EET (GMT+2)", apply:"https://coliving.bansko.bg/"},
+  {name:"Nomadico (Bansko / Madeira)", type:"B", region:"Europe", city:"Bansko", country:"Bulgaria", monthly:570, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Two sites (Bansko and Madeira), monthly all-in. Easy on your SK permit.", start:null, weeks:null, wifi:"Fast", tz:"EET (GMT+2)", apply:"https://nomadico.co/"},
+  {name:"Colive Madeira", type:"B", region:"Europe", city:"Funchal", country:"Portugal", monthly:760, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen short stays on your SK permit; Portugal nomad visa for 90+ days. Fibre on the island.", start:null, weeks:null, wifi:"Fast fibre", tz:"WET (GMT+0)", apply:"https://colive.pt/"},
+  {name:"Sun and Co.", type:"B", region:"Europe", city:"Javea", country:"Spain", monthly:950, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Long-running coliving on the Costa Blanca; Spain nomad visa for the long haul.", start:null, weeks:null, wifi:"Reliable", tz:"CET (GMT+1)", apply:"https://sun-and-co.com/"},
+  {name:"Nine Coliving Tenerife", type:"B", region:"Europe", city:"Tenerife", country:"Spain", monthly:1100, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen (Canary Islands). Easy short stays on your SK permit; Spain nomad visa option.", start:null, weeks:null, wifi:"Fast fibre", tz:"WET (GMT+0)", apply:"https://ninecoliving.com/"},
+  {name:"Casa Netural", type:"B", region:"Europe", city:"Matera", country:"Italy", monthly:710, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Small community-led coliving in southern Italy; strong value.", start:null, weeks:null, wifi:"Reliable", tz:"CET (GMT+1)", apply:"https://www.benetural.com/"},
+  {name:"Chateau Coliving", type:"B", region:"Europe", city:"Loire Valley", country:"France", monthly:1790, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Design-forward chateau with coworking; premium end of the range.", start:null, weeks:null, wifi:"Fast", tz:"CET (GMT+1)", apply:"https://www.chateau.coliving.com/"},
+  {name:"Swiss Escape", type:"B", region:"Europe", city:"Grimentz", country:"Switzerland", monthly:1000, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Switzerland is in Schengen, so your SK permit covers short stays. Alpine coliving; living costs run high.", start:null, weeks:null, wifi:"Fast", tz:"CET (GMT+1)", apply:"https://www.swissescape.co/"},
+  {name:"Enso Coliving Barcelona", type:"B", region:"Europe", city:"Barcelona", country:"Spain", monthly:1150, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. City coliving aimed at remote workers; Spain nomad visa for 90+ days.", start:null, weeks:null, wifi:"Fast fibre", tz:"CET (GMT+1)", apply:"https://www.ensocoliving.com/"},
+  // ===== AFRICA =====
+  {name:"SunDesk Taghazout", type:"B", region:"Africa", city:"Taghazout", country:"Morocco", monthly:750, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Morocco is visa-free for Turkish passports up to 3 months. Oceanfront surf-and-work base, good value.", start:null, weeks:null, wifi:"Reliable", tz:"WET (GMT+1)", apply:"https://www.sundesk.co/"},
+  // ===== SE ASIA =====
+  {name:"Network School", type:"A", region:"SE Asia", city:"Forest City", country:"Malaysia", monthly:1400, priceBasis:"per_person", outsideWork:true, visa:"easy", visaNote:"Malaysia is visa-free for Turkish passports up to ~90 days. Balaji's builder society; ~$1,500/mo shared all-in (meals, gym, coworking). Rolling monthly entry.", start:null, weeks:null, wifi:"Fast", tz:"MYT (GMT+8)", apply:"https://ns.com/"},
+  // ===== LATIN AMERICA =====
+  {name:"Casa Basilico (pop-up)", type:"B", region:"Latin America", city:"Oaxaca", country:"Mexico", monthly:870, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Mexico uses an online authorisation for Turkish passports, and a valid Schengen residence can waive it. Pop-up foodie coliving that changes city every few months.", start:null, weeks:null, wifi:"Reliable", tz:"CST (GMT-6)", apply:"https://casabasilico.com/"},
+  // ===== NORTH AMERICA — structured founder residencies. Mostly visa-HARD for a Turkish passport (full US visa, Schengen residence does not help). Monthly = est. local room cost; the programs fund you rather than charge rent. =====
+  {name:"Solo Founders Program", type:"A", region:"North America", city:"San Francisco", country:"USA", monthly:1400, priceBasis:"per_person", outsideWork:false, visa:"hard", visaNote:"US visa needed for Turkish passports; SK residence does not help. 3 months from Sept 2026; optional housing ~$1,500/mo above the office. They pay you, no fee.", start:"2026-09-01", weeks:13, wifi:"Fast fibre", tz:"PST (GMT-8)", apply:"https://solofounders.com/program"},
+  {name:"South Park Commons Fellowship", type:"A", region:"North America", city:"San Francisco", country:"USA", monthly:2000, priceBasis:"per_person", outsideWork:false, visa:"hard", visaNote:"US visa needed; SK residence does not help. Fall 2026 cohort kicks off late Sept; they invest in you. Monthly = est. SF room cost.", start:"2026-09-28", weeks:12, wifi:"Fast fibre", tz:"PST (GMT-8)", apply:"https://www.southparkcommons.com/founder-fellowship/"},
+  {name:"Entrepreneur First (SF)", type:"A", region:"North America", city:"San Francisco", country:"USA", monthly:2000, priceBasis:"per_person", outsideWork:false, visa:"hard", visaNote:"EF helps arrange a visa, but a US site still means a hard process for Turkish passports. Apply by 22 Jun 2026. Monthly = est. SF room cost.", start:"2026-10-01", weeks:12, wifi:"Fast fibre", tz:"PST (GMT-8)", apply:"https://apply.joinef.com/"},
+  {name:"Afore Founder-in-Residence", type:"A", region:"North America", city:"San Francisco", country:"USA", monthly:1900, priceBasis:"per_person", outsideWork:false, visa:"hard", visaNote:"US visa needed; SK residence does not help. Rolling 2026 starts (Jan/Apr/Jun); 2-month program, they invest $100K+. Monthly = est. SF room cost.", start:"2026-06-15", weeks:10, wifi:"Fast fibre", tz:"PST (GMT-8)", apply:"https://www.afore.vc/students"},
+  {name:"focal Residency", type:"A", region:"North America", city:"Miami", country:"USA", monthly:1600, priceBasis:"per_person", outsideWork:false, visa:"hard", visaNote:"US visa needed; SK residence does not help. Winter 2026, 3+ months, 6 days/week in-person, Miami relocation. They invest. Monthly = est. Miami room cost.", start:"2026-01-12", weeks:13, wifi:"Fast", tz:"EST (GMT-5)", apply:"https://www.focal.vc/residency"},
+  {name:"PEAK6 Trials (fintech)", type:"A", region:"North America", city:"Austin", country:"USA", monthly:1300, priceBasis:"per_person", outsideWork:false, visa:"hard", visaNote:"US visa needed; SK residence does not help. 12-month fintech residency, $100k salary. Monthly = est. Austin room cost.", start:"2026-09-01", weeks:52, wifi:"Fast", tz:"CST (GMT-6)", apply:"https://peak6trials.com/"},
+  {name:"Roux Founder Residency", type:"A", region:"North America", city:"Portland (Maine)", country:"USA", monthly:1200, priceBasis:"per_person", outsideWork:false, visa:"hard", visaNote:"US visa needed; SK residence does not help. Runs Sep–Dec 2026, no fee. Monthly = est. local room cost.", start:"2026-09-08", weeks:16, wifi:"Fast", tz:"EST (GMT-5)", apply:"https://roux.northeastern.edu/entrepreneurship/founder-residency/"},
+  // ===== MORE EUROPE (Schengen + visa-free-for-Turkish non-EU) =====
+  {name:"Sende", type:"B", region:"Europe", city:"Senderiz", country:"Spain", monthly:690, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Rural Galicia escape, full-board, strong wifi. Among the cheapest in Western Europe.", start:null, weeks:null, wifi:"Reliable", tz:"CET (GMT+1)", apply:"https://sende.co/"},
+  {name:"Coconat", type:"B", region:"Europe", city:"Klein Glien", country:"Germany", monthly:690, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Countryside retreat ~1h from Berlin, full-board, good for focused work.", start:null, weeks:null, wifi:"Fast", tz:"CET (GMT+1)", apply:"https://coconat-space.com/"},
+  {name:"Mokrin House", type:"B", region:"Europe", city:"Mokrin", country:"Serbia", monthly:1100, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Serbia is visa-free for Turkish passports (no Schengen issue). Design-led rural coliving, 3 meals/day, 24/7 coworking.", start:null, weeks:null, wifi:"Reliable", tz:"CET (GMT+1)", apply:"https://mokrinhouse.com/"},
+  {name:"Urban Campus Madrid", type:"B", region:"Europe", city:"Madrid", country:"Spain", monthly:1120, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Central-city coliving with fibre and events; Spain nomad visa for 90+ days.", start:null, weeks:null, wifi:"Fast fibre", tz:"CET (GMT+1)", apply:"https://www.urbancampus.com/"},
+  // ----- Europe "browse" hubs: city + verified directory link (Schengen = easy on your SK permit). Each city has dozens of spaces; pick on the directory. -----
+  {name:"Lisbon (browse)", type:"B", region:"Europe", city:"Lisbon", country:"Portugal", monthly:1100, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen, easy on your SK permit. Major nomad hub; dozens of colivings. Portugal nomad visa for 90+ days.", start:null, weeks:null, wifi:"Fast fibre", tz:"WET (GMT+0)", apply:"https://coliving.com/lisbon"},
+  {name:"Barcelona (browse)", type:"B", region:"Europe", city:"Barcelona", country:"Spain", monthly:1150, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. One of the densest coliving markets in Europe (100+ spaces). Spain nomad visa for longer stays.", start:null, weeks:null, wifi:"Fast fibre", tz:"CET (GMT+1)", apply:"https://coliving.com/barcelona"},
+  {name:"Valencia (browse)", type:"B", region:"Europe", city:"Valencia", country:"Spain", monthly:900, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Cheaper than Barcelona, beach city, growing nomad scene. Easy on your SK permit.", start:null, weeks:null, wifi:"Fast", tz:"CET (GMT+1)", apply:"https://coliving.com/valencia"},
+  {name:"Madrid (browse)", type:"B", region:"Europe", city:"Madrid", country:"Spain", monthly:1100, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. ~58 listed spaces; strong coworking. Spain nomad visa for 90+ days.", start:null, weeks:null, wifi:"Fast fibre", tz:"CET (GMT+1)", apply:"https://coliving.com/madrid"},
+  {name:"Berlin (browse)", type:"B", region:"Europe", city:"Berlin", country:"Germany", monthly:1050, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen, same zone as your residence. ~32 listed spaces; big startup/builder scene.", start:null, weeks:null, wifi:"Fast", tz:"CET (GMT+1)", apply:"https://coliving.com/berlin"},
+  {name:"Porto (browse)", type:"B", region:"Europe", city:"Porto", country:"Portugal", monthly:950, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Cheaper than Lisbon, growing nomad community. Portugal nomad visa option.", start:null, weeks:null, wifi:"Fast fibre", tz:"WET (GMT+0)", apply:"https://coliving.com/porto"},
+  {name:"Athens (browse)", type:"B", region:"Europe", city:"Athens", country:"Greece", monthly:850, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Schengen. Low cost for Western Europe, islands nearby. Greece nomad visa for longer stays.", start:null, weeks:null, wifi:"Reliable", tz:"EET (GMT+2)", apply:"https://coliving.com/athens"},
+  // ===== MORE SE ASIA =====
+  {name:"KoHub Koh Lanta", type:"B", region:"SE Asia", city:"Koh Lanta", country:"Thailand", monthly:1100, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Thailand is visa-free for Turkish passports up to 60 days. All-inclusive package: room, 1Gbps coworking, 2 meals/day, beach 5 min away.", start:null, weeks:null, wifi:"Fast fibre", tz:"ICT (GMT+7)", apply:"https://kohub.org/"},
+  {name:"Outpost Ubud", type:"B", region:"SE Asia", city:"Ubud", country:"Indonesia", monthly:870, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Indonesia entry is 30 days, so a longer stay needs a social/business visa (B211A). Two Ubud sites (Penestanan, Nyuh Kuning); from ~$917/mo with coworking included.", start:null, weeks:null, wifi:"Fast", tz:"WITA (GMT+8)", apply:"https://www.outpost-asia.com/"},
+  {name:"Tribal Bali", type:"B", region:"SE Asia", city:"Canggu", country:"Indonesia", monthly:900, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Same Indonesia 30-day entry; longer needs a visa. Social, community-driven base in Canggu.", start:null, weeks:null, wifi:"Reliable", tz:"WITA (GMT+8)", apply:"https://tribalbali.com/"},
+  {name:"Outsite Bali", type:"B", region:"SE Asia", city:"Canggu", country:"Indonesia", monthly:1200, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Indonesia 30-day entry; longer needs a visa. Outsite is a membership network with private-villa feel and community access.", start:null, weeks:null, wifi:"Fast", tz:"WITA (GMT+8)", apply:"https://www.outsite.co/"},
+  {name:"Dojo Bali Coliving", type:"B", region:"SE Asia", city:"Canggu", country:"Indonesia", monthly:1100, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Indonesia 30-day entry; longer needs a B211A. Soft-landing package near Echo Beach: 10 rooms, airport pickup, SIM, unlimited 24/7 coworking, surf & yoga.", start:null, weeks:null, wifi:"Fast fibre", tz:"WITA (GMT+8)", apply:"https://dojobali.org/coliving/"},
+  {name:"Livit Hub Bali", type:"B", region:"SE Asia", city:"Sanur", country:"Indonesia", monthly:950, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Indonesia 30-day entry; longer needs a visa. Coliving+coworking in quieter Sanur, 5 min to the beach; founder/maker community.", start:null, weeks:null, wifi:"Fast", tz:"WITA (GMT+8)", apply:"https://livitspaces.com/"},
+  {name:"Matra Bali", type:"B", region:"SE Asia", city:"Ubud", country:"Indonesia", monthly:850, priceBasis:"per_room", outsideWork:true, visa:"medium", visaNote:"Indonesia 30-day entry; longer needs a visa. Coliving+coworking with wellness focus in Ubud.", start:null, weeks:null, wifi:"Reliable", tz:"WITA (GMT+8)", apply:"https://www.matra.co/"},
+  {name:"Draper Startup House Singapore", type:"B", region:"SE Asia", city:"Singapore", country:"Singapore", monthly:1300, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Singapore is visa-free for Turkish passports (up to 30 days, extendable). Startup-culture coliving; pricey city.", start:null, weeks:null, wifi:"Fast fibre", tz:"SGT (GMT+8)", apply:"https://draperstartuphouse.com/"},
+  // ===== CAUCASUS & MORE LATIN AMERICA — visa-easy for you; these are "browse" entries (city + verified cost range) linking a real directory, since individual houses here turn over fast. =====
+  {name:"Coliving Tbilisi (browse)", type:"B", region:"Caucasus", city:"Tbilisi", country:"Georgia", monthly:450, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Easiest of all: Turkish nationals enter Georgia with an ID card and can stay up to 360 days. Coliving from ~$350-550/mo; very low cost of living.", start:null, weeks:null, wifi:"Fast fibre", tz:"GET (GMT+4)", apply:"https://coliving.com/"},
+  {name:"Coliving Medellin (browse)", type:"B", region:"Latin America", city:"Medellin", country:"Colombia", monthly:700, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Colombia is visa-free for Turkish passports (90 days, extendable). Big nomad scene in El Poblado/Laureles; spring climate year-round. Verified spaces from ~$400/mo.", start:null, weeks:null, wifi:"Fast", tz:"COT (GMT-5)", apply:"https://www.colivingcommunity.com/coliving/colombia"},
+  {name:"Coliving Mexico City (browse)", type:"B", region:"Latin America", city:"Mexico City", country:"Mexico", monthly:1000, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Mexico uses an online authorisation for Turkish passports, and a valid Schengen residence can waive it (180 days). Fast-growing coliving market in Roma/Condesa.", start:null, weeks:null, wifi:"Fast", tz:"CST (GMT-6)", apply:"https://coliving.com/"},
+  // ===== MORE AFRICA & LATIN AMERICA (browse entries: city + verified visa, real directory link) =====
+  {name:"Coliving Cape Town (browse)", type:"B", region:"Africa", city:"Cape Town", country:"South Africa", monthly:1100, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"South Africa is visa-free for Turkish passports for 30 days; a remote-work visa is now active for longer stays. Strong nomad scene, summer during Europe's winter.", start:null, weeks:null, wifi:"Reliable", tz:"SAST (GMT+2)", apply:"https://coliving.com/cape-town"},
+  {name:"Coliving Buenos Aires (browse)", type:"B", region:"Latin America", city:"Buenos Aires", country:"Argentina", monthly:650, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Argentina is visa-free for Turkish passports up to 90 days. Low cost, European feel, summer Dec-Feb. Affordable coliving with all-in pricing.", start:null, weeks:null, wifi:"Reliable", tz:"ART (GMT-3)", apply:"https://coliving.com/buenos-aires"},
+  {name:"Coliving Florianopolis (browse)", type:"B", region:"Latin America", city:"Florianopolis", country:"Brazil", monthly:700, priceBasis:"per_room", outsideWork:true, visa:"easy", visaNote:"Brazil is visa-free for Turkish passports up to 90 days. Island surf-and-work base in the south.", start:null, weeks:null, wifi:"Reliable", tz:"BRT (GMT-3)", apply:"https://coliving.com/florianopolis"}
+];
+
+/* ---------- favourites (persist on the deployed site; safe no-op in sandbox) ---------- */
+const FAV_KEY="bcf_favs";
+let favs=new Set();
+try{ const raw=localStorage.getItem(FAV_KEY); if(raw) favs=new Set(JSON.parse(raw)); }catch(e){}
+function saveFavs(){ try{ localStorage.setItem(FAV_KEY, JSON.stringify([...favs])); }catch(e){} }
+function toggleFav(name){ favs.has(name)?favs.delete(name):favs.add(name); saveFavs(); }
+
+/* ---------- state ---------- */
+const state={q:"",type:"all",region:"all",budget:2800,visa:"all",months:3,share:false,workOnly:false,favOnly:false,sort:"cost",view:"grid"};
+const NOW=new Date("2026-06-01");
+const TL_MONTHS=13;
+const visaRank={easy:1,medium:2,hard:3};
+const eur=n=>"\u20ac"+Math.round(n).toLocaleString("en-US");
+function perPerson(p){ return (state.share && p.priceBasis==="per_room") ? p.monthly/2 : p.monthly; }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+
+/* ---------- filtering ---------- */
+function filtered(){
+  return PROGRAMS.filter(p=>{
+    if(state.type!=="all" && p.type!==state.type) return false;
+    if(state.region!=="all" && p.region!==state.region) return false;
+    if(state.workOnly && !p.outsideWork) return false;
+    if(state.favOnly && !favs.has(p.name)) return false;
+    if(perPerson(p)>state.budget) return false;
+    if(state.visa!=="all" && visaRank[p.visa]>visaRank[state.visa]) return false;
+    if(state.q){
+      const hay=(p.name+" "+p.city+" "+p.country+" "+p.region).toLowerCase();
+      if(!hay.includes(state.q.toLowerCase())) return false;
+    }
+    return true;
+  }).sort((a,b)=>{
+    if(state.sort==="cost") return perPerson(a)-perPerson(b);
+    if(state.sort==="name") return a.name.localeCompare(b.name);
+    const da=a.start?new Date(a.start):new Date("2099-01-01");
+    const db=b.start?new Date(b.start):new Date("2099-01-01");
+    return da-db;
+  });
+}
+
+/* ---------- render: cards ---------- */
+function visaPill(v){
+  const map={easy:["yes","Visa easy"],medium:["neutral","Visa medium"],hard:["no","Visa hard"]};
+  const [cls,txt]=map[v]; return `<span class="pill ${cls}"><span class="dot"></span>${txt}</span>`;
+}
+function dateLabel(p){
+  if(!p.start) return "Rolling \u00b7 join anytime";
+  const d=new Date(p.start);
+  return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})+(p.weeks?` \u00b7 ${p.weeks} wks`:"");
+}
+function renderGrid(list){
+  const grid=document.getElementById("grid");
+  grid.innerHTML=list.map((p,i)=>{
+    const pp=perPerson(p), shared=state.share&&p.priceBasis==="per_room", total=pp*state.months, fav=favs.has(p.name);
+    return `<article class="card" style="animation-delay:${Math.min(i*30,420)}ms">
+      <div class="head">
+        <div><div class="cname">${p.name}</div><div class="loc">${p.city}, ${p.country} \u00b7 ${p.region}</div></div>
+        <div class="head-right">
+          <button class="star" data-fav="${esc(p.name)}" aria-pressed="${fav}" title="Save to favourites">${fav?"\u2605":"\u2606"}</button>
+          <span class="tag ${p.type}">${p.type==="A"?"Residency":"Coliving"}</span>
+        </div>
+      </div>
+      <div class="cost">
+        <span class="big">${eur(pp)}</span><span class="per">/ person / mo</span>
+        <span class="total"><b>${eur(total)}</b><span>${state.months} mo total</span></span>
+      </div>
+      <div class="basis">${p.priceBasis==="per_room"?(shared?"Per-room price, split between 2":"Priced per room \u00b7 sharing halves it"):"Priced per person"}</div>
+      <div class="meta">
+        ${p.outsideWork?'<span class="pill yes"><span class="dot"></span>Outside work OK</span>':'<span class="pill no"><span class="dot"></span>No outside work</span>'}
+        ${visaPill(p.visa)}
+      </div>
+      <div class="visanote">\ud83d\udec2 <b>Visa:</b> ${p.visaNote}</div>
+      <div class="extra">
+        <span>\ud83d\udcc5 <b>${dateLabel(p)}</b></span>
+        <span>\ud83d\udcf6 <b>${p.wifi}</b></span>
+        <span>\ud83d\udd52 <b>${p.tz}</b></span>
+      </div>
+      <a class="apply" href="${p.apply}" target="_blank" rel="noopener">Apply / details \u2192</a>
+    </article>`;
+  }).join("");
+  grid.querySelectorAll(".star").forEach(b=>b.addEventListener("click",()=>{ toggleFav(b.dataset.fav); updateFavCount(); render(); }));
+}
+
+/* ---------- render: timeline ---------- */
+function renderTimeline(list){
+  const tl=document.getElementById("timeline");
+  const months=[];
+  for(let i=0;i<TL_MONTHS;i++){ const d=new Date(NOW); d.setMonth(d.getMonth()+i);
+    months.push(d.toLocaleDateString("en-GB",{month:"short"}).toUpperCase()+(d.getMonth()===0?" "+String(d.getFullYear()).slice(2):"")); }
+  const head=`<div class="tl-months"><div class="tl-name" style="padding:9px 14px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.1em;color:var(--muted)">PROGRAM</div>
+    <div class="scale" style="grid-template-columns:repeat(${TL_MONTHS},1fr)">${months.map(m=>`<div class="m">${m}</div>`).join("")}</div></div>`;
+  const totalDays=TL_MONTHS*30.4;
+  const rows=list.map(p=>{
+    let bar;
+    if(!p.start){ bar=`<div class="bar rolling">rolling</div>`; }
+    else{
+      const start=new Date(p.start), offDays=(start-NOW)/(1000*60*60*24);
+      const left=Math.max(0,(offDays/totalDays)*100), width=Math.max(6,(((p.weeks||4)*7)/totalDays)*100);
+      bar = left>100 ? `<div class="bar A" style="left:auto;right:6px">${dateLabel(p)}</div>`
+                     : `<div class="bar A" style="left:${left}%;width:${Math.min(width,100-left)}%">${p.weeks} wks</div>`;
+    }
+    return `<div class="tl-row">
+      <div class="tl-name">${favs.has(p.name)?'<span class="tl-star">\u2605</span>':''}<div><div class="n">${p.name}</div><div class="s">${p.city}, ${p.country} \u00b7 ${eur(perPerson(p))}/mo</div></div></div>
+      <div class="tl-track">${bar}</div>
+    </div>`;
+  }).join("");
+  tl.innerHTML=head+rows+`<div class="tl-foot">Solid bars are fixed-date residencies. Striped bars are open coliving you can join anytime. Window: ${months[0]} 2026 to ${months[TL_MONTHS-1]} 2027.</div>`;
+}
+
+/* ---------- main render ---------- */
+function render(){
+  const list=filtered();
+  document.getElementById("count").innerHTML=`${list.length} place${list.length===1?"":"s"} <span>of ${PROGRAMS.length}</span>`;
+  const empty=document.getElementById("empty"),grid=document.getElementById("grid"),tl=document.getElementById("timeline");
+  if(list.length===0){ empty.classList.remove("hide"); grid.classList.add("hide"); tl.classList.add("hide"); return; }
+  empty.classList.add("hide");
+  if(state.view==="grid"){ grid.classList.remove("hide"); tl.classList.add("hide"); renderGrid(list); }
+  else{ tl.classList.remove("hide"); grid.classList.add("hide"); renderTimeline(list); }
+}
+function updateFavCount(){ document.getElementById("favCount").textContent="("+favs.size+")"; }
+
+/* ---------- build region chips from data ---------- */
+(function(){
+  const order=["Europe","Caucasus","Middle East","Africa","South Asia","SE Asia","East Asia","Oceania","North America","Latin America"];
+  const present=[...new Set(PROGRAMS.map(p=>p.region))];
+  const regions=present.sort((a,b)=>{ const ia=order.indexOf(a),ib=order.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib); });
+  document.getElementById("regionChips").innerHTML=
+    `<button class="chip" data-region="all" aria-pressed="true">All regions</button>`+
+    regions.map(r=>`<button class="chip" data-region="${esc(r)}" aria-pressed="false">${r}</button>`).join("");
+})();
+
+/* ---------- wiring ---------- */
+const $=s=>document.querySelector(s);
+$("#q").addEventListener("input",e=>{state.q=e.target.value;render()});
+$("#budget").addEventListener("input",e=>{ state.budget=+e.target.value; $("#budgetVal").textContent=state.budget>=2800?"Any":eur(state.budget); render(); });
+$("#months").addEventListener("input",e=>{ state.months=+e.target.value; $("#monthsVal").textContent=state.months+" mo"; render(); });
+$("#share").addEventListener("change",e=>{state.share=e.target.checked;render()});
+$("#workOnly").addEventListener("change",e=>{state.workOnly=e.target.checked;render()});
+$("#sort").addEventListener("change",e=>{state.sort=e.target.value;render()});
+$("#favToggle").addEventListener("click",e=>{ state.favOnly=!state.favOnly; e.currentTarget.setAttribute("aria-pressed",state.favOnly); render(); });
+
+function chipGroup(sel,key,prop){
+  document.querySelectorAll(sel).forEach(c=>c.addEventListener("click",()=>{
+    document.querySelectorAll(sel).forEach(x=>x.setAttribute("aria-pressed","false"));
+    c.setAttribute("aria-pressed","true"); state[key]=c.dataset[prop]; render();
+  }));
+}
+chipGroup("#typeChips .chip","type","type");
+chipGroup("#visaChips .chip","visa","visa");
+chipGroup("#regionChips .chip","region","region");
+chipGroup(".views .view","view","view");
+
+$("#reset").addEventListener("click",()=>{
+  Object.assign(state,{q:"",type:"all",region:"all",budget:2800,visa:"all",months:3,share:false,workOnly:false,favOnly:false,sort:"cost"});
+  $("#q").value=""; $("#budget").value=2800; $("#budgetVal").textContent="Any";
+  $("#months").value=3; $("#monthsVal").textContent="3 mo";
+  $("#share").checked=false; $("#workOnly").checked=false; $("#sort").value="cost";
+  $("#favToggle").setAttribute("aria-pressed","false");
+  document.querySelectorAll("#typeChips .chip,#visaChips .chip,#regionChips .chip").forEach(x=>{
+    const isAll=x.dataset.type==="all"||x.dataset.visa==="all"||x.dataset.region==="all";
+    x.setAttribute("aria-pressed",isAll?"true":"false");
+  });
+  render();
+});
+
+updateFavCount();
+render();
+</script>
+</body>
+</html>
